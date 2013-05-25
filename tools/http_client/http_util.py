@@ -69,8 +69,6 @@ class UrlFetcher(object):
     except BaseException, e:
       print e
       resp.status = -1
-    finally:
-      f.close()
     return resp
 
   def _makeResponse(self, urllib2_response):
