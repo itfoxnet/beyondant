@@ -15,7 +15,7 @@ import http_util
 
 url = sys.argv[1]
 def main(argv):
-  socket.setdefaulttimeout(30)
+  socket.setdefaulttimeout(1)
 
   headers = {}
   headers['User-Agent'] = 'Mozilla/5.0 (X11; Linux x86_64; rv:2.0.1) Gecko/20100101 Firefox/4.0.1'
@@ -26,7 +26,10 @@ def main(argv):
 
   fetcher = http_util.UrlFetcher()
   resp = fetcher.fetch(url, headers = headers)
-  print resp
+  print "url:", resp.final_url
+  print "status:", resp.status
+  print "response_headers:", resp.headers
+  print "response_body:", resp.body
 
 if __name__ == '__main__':
   main(sys.argv)

@@ -85,13 +85,14 @@ class HeadersBuilder(object):
      def AddHeader(self, key, val) '''
 
 class PostDataBuilder(object):
-  data = {}
+  data = ""
   def clear(self) :
-    self.data.clear()
+    self.data = ""
 
   def makePostData(self, data_str) :
     self.clear()
     lines = data_str.split('\n')
+    data_dict = {}
     for line in lines :
       line = line.strip()
       pos = line.find(':')
@@ -99,7 +100,8 @@ class PostDataBuilder(object):
         continue
       key = line[0:pos]
       val = line[pos+1:]
-      self.data[key] = val
+      data_dict[key] = val
+    self.data = urllib.urlencode(data_dict)
     return self.data
 
   def makePostDataFromFile(self, data_file) :
@@ -171,7 +173,6 @@ def main(argv):
     headers = headers_builder.makeDefaultHeaders()
   if gflags.FLAGS.data_file is not None :
     body = data_builder.makePostDataFromFile(gflags.FLAGS.data_file)
-    body = urllib.urlencode(body)
   fetcher = UrlFetcher()
   resp = fetcher.fetch(url = url, body = body, headers = headers)
   if resp.status != 200:

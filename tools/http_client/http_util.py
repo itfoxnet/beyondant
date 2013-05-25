@@ -64,10 +64,13 @@ class UrlFetcher(object):
       f = urllib2.urlopen(req)
       resp = self._makeResponse(f)
     except urllib2.HTTPError, e:
-      print e
+      print "Error:", e
       resp.status = e.code
+    except urllib2.URLError, e:
+      print "Error:", e
+      resp.status = -1
     except BaseException, e:
-      print e
+      print "Error:", e
       resp.status = -1
     return resp
 
@@ -109,10 +112,13 @@ class BindableUrlFetcher(object):
       finally:
         url_info.close()
     except urllib2.HTTPError, e:
-      print e
+      print "Error:", e
       resp.status = e.code
+    except urllib2.URLError, e:
+      print "Error:", e
+      resp.status = -1
     except BaseException, e:
-      print e
+      print "Error:", e
       resp.status = -1
     return resp
 
