@@ -1,8 +1,8 @@
 #!/usr/bin/python
+# -*- coding:utf-8 -*-
 # Copyright 2013 Beyondant. All Right Reserved.
 # Date: 2013-07-06
 
-# -*- charset:utf8 -*-
 __author__ = 'cuberub@gmail.com'
 import cgi
 import os
@@ -13,7 +13,9 @@ from xml.dom import minidom
 
 sys.path.append('/srv/www/dingdong.com/application')
 import baike_parser
-import baike_db
+import baike_table
+import cook_parser
+import cook_table
 
 os.environ['PYTHON_EGG_CACHE'] = '/srv/www/dingdong.com/.python-egg'
 
@@ -26,8 +28,20 @@ def validate(environ, start_response):
     start_response(status, response_headers)
     return [output]
 
+def is_cook_request(content) :
+  if (content.startswith("cp ")
+      or content.startswith("CP ")
+      or content.find("caipu") != -1
+      or content.find("菜谱") != -1) :
+    return True
+  else :
+    return False
+
 def is_baike_request(content) :
   return True
+
+def rewrite_cook_request(content) :
+  return content.replace("caipu", "").replace("菜谱", "").replace("cp", "").replace("CP", "").replace(":", "").replace(" ", "")
 
 def random_echo():
   ans = "Tomorrow will be better"
@@ -53,14 +67,24 @@ def make_response(request):
   cur_time = int(time.time())
 
   ans = ""
-  if is_baike_request(content) :
-    #baike_db.create_db() # call it first time
-    ans = baike_db.select_db(content)
+  if is_cook_request(content):
+    content = rewrite_cook_request(content)
+    table = cook_table.CookTable()
+    ans = table.select(content)
+    if ans == "" :
+      ans = cook_parser.acquire_cook_summary_by_keyword(content)
+      if ans != "" and len(ans) > 0 :
+        table.update(content, ans)
+    else :
+      ans = str(ans.encode("utf8"))
+  elif is_baike_request(content) :
+    table = baike_table.BaikeTable()
+    ans = table.select(content)
     if ans == "" :
       ans = baike_parser.acquire_baidu_baike_summary_by_keyword(content)
       if ans != "" and len(ans) > 0 :
         ans = str(ans.encode("utf8"))
-        baike_db.update_db(content, ans)
+        table.update(content, ans)
     else :
       ans = str(ans.encode("utf8"))
 
